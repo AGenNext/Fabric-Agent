@@ -1,0 +1,128 @@
+openapi: 3.1.0
+info:
+  title: Fabric Agent API
+  version: 0.1.0
+  description: Policy-first API contract for a Fabric Agent operating inside a governed fabric.
+servers:
+  - url: https://fabric-agent.example.com
+paths:
+  /intents:
+    post:
+      summary: Submit an intent to the Fabric Agent
+      operationId: submitIntent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IntentRequest'
+      responses:
+        '202':
+          description: Intent accepted for governed processing
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IntentAccepted'
+  /boxes/{boxId}:
+    get:
+      summary: Read a governed box
+      operationId: getBox
+      parameters:
+        - name: boxId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Box state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Box'
+  /events:
+    post:
+      summary: Append an auditable event
+      operationId: appendEvent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FabricEvent'
+      responses:
+        '201':
+          description: Event recorded
+components:
+  schemas:
+    IntentRequest:
+      type: object
+      required: [intentId, actor, objective, context]
+      properties:
+        intentId:
+          type: string
+        actor:
+          $ref: '#/components/schemas/IdentityRef'
+        objective:
+          type: string
+        context:
+          type: object
+        constraints:
+          type: array
+          items:
+            type: string
+    IntentAccepted:
+      type: object
+      required: [intentId, status, boxId]
+      properties:
+        intentId:
+          type: string
+        status:
+          enum: [accepted, rejected, requires_approval]
+        boxId:
+          type: string
+    IdentityRef:
+      type: object
+      required: [id, type]
+      properties:
+        id:
+          type: string
+        type:
+          enum: [human, agent, service, organization]
+    Box:
+      type: object
+      required: [boxId, state, owner, createdAt]
+      properties:
+        boxId:
+          type: string
+        state:
+          enum: [proposed, active, blocked, reconciled, archived]
+        owner:
+          $ref: '#/components/schemas/IdentityRef'
+        evidence:
+          type: array
+          items:
+            type: object
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    FabricEvent:
+      type: object
+      required: [eventId, boxId, actor, action, observedAt]
+      properties:
+        eventId:
+          type: string
+        boxId:
+          type: string
+        actor:
+          $ref: '#/components/schemas/IdentityRef'
+        action:
+          type: string
+        evidence:
+          type: object
+        observedAt:
+          type: string
+          format: date-time

@@ -1,0 +1,66 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: boxes.fabric.agnext.io
+spec:
+  group: fabric.agnext.io
+  scope: Namespaced
+  names:
+    plural: boxes
+    singular: box
+    kind: Box
+    shortNames:
+      - bx
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              required:
+                - owner
+                - type
+                - objective
+              properties:
+                owner:
+                  type: string
+                type:
+                  type: string
+                  enum:
+                    - intent
+                    - task
+                    - decision
+                    - event
+                    - evidence
+                    - approval
+                    - reconciliation
+                    - artifact
+                objective:
+                  type: string
+                context:
+                  type: object
+                  x-kubernetes-preserve-unknown-fields: true
+                constraints:
+                  type: array
+                  items:
+                    type: string
+                policyRef:
+                  type: string
+            status:
+              type: object
+              properties:
+                phase:
+                  type: string
+                policyEffect:
+                  type: string
+                evidenceCount:
+                  type: integer
+                reconciledAt:
+                  type: string
+                  format: date-time
+      subresources:
+        status: {}

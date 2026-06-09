@@ -1,0 +1,171 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/AGenNext/Fabric-Agent/contracts/box.schema.json",
+  "title": "Fabric Box",
+  "description": "Canonical accountable unit of work, state, evidence, and reconciliation inside the Fabric model.",
+  "type": "object",
+  "required": [
+    "boxId",
+    "type",
+    "state",
+    "owner",
+    "createdAt",
+    "updatedAt",
+    "policy"
+  ],
+  "properties": {
+    "boxId": {
+      "type": "string",
+      "description": "Globally unique box identifier. Recommended format: box_<uuid>."
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "intent",
+        "task",
+        "decision",
+        "event",
+        "evidence",
+        "approval",
+        "reconciliation",
+        "artifact"
+      ]
+    },
+    "state": {
+      "type": "string",
+      "enum": [
+        "proposed",
+        "pending_policy",
+        "requires_approval",
+        "active",
+        "blocked",
+        "executed",
+        "reconciled",
+        "archived"
+      ]
+    },
+    "owner": {
+      "$ref": "#/$defs/identityRef"
+    },
+    "actor": {
+      "$ref": "#/$defs/identityRef"
+    },
+    "context": {
+      "type": "object",
+      "description": "Resolved context available to the box. Must not contain secrets unless explicitly approved by policy."
+    },
+    "objective": {
+      "type": "string"
+    },
+    "constraints": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "policy": {
+      "$ref": "#/$defs/policyDecision"
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/evidenceRef"
+      },
+      "default": []
+    },
+    "links": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/boxLink"
+      },
+      "default": []
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "schema": {
+      "type": "object",
+      "description": "Optional schema.org or JSON-LD metadata snapshot for semantic grounding."
+    }
+  },
+  "$defs": {
+    "identityRef": {
+      "type": "object",
+      "required": ["id", "type"],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["human", "agent", "service", "organization"]
+        },
+        "displayName": {
+          "type": "string"
+        }
+      }
+    },
+    "policyDecision": {
+      "type": "object",
+      "required": ["effect", "checkedAt"],
+      "properties": {
+        "effect": {
+          "type": "string",
+          "enum": ["allow", "deny", "requires_approval"]
+        },
+        "reason": {
+          "type": "string"
+        },
+        "checkedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "engine": {
+          "type": "string",
+          "description": "Policy engine or control that made the decision, for example OPA, OpenFGA, AuthZEN, or human approval."
+        }
+      }
+    },
+    "evidenceRef": {
+      "type": "object",
+      "required": ["evidenceId", "kind", "uri", "capturedAt"],
+      "properties": {
+        "evidenceId": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string",
+          "enum": ["log", "trace", "file", "approval", "api_response", "diff", "attestation"]
+        },
+        "uri": {
+          "type": "string"
+        },
+        "hash": {
+          "type": "string"
+        },
+        "capturedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "boxLink": {
+      "type": "object",
+      "required": ["rel", "boxId"],
+      "properties": {
+        "rel": {
+          "type": "string",
+          "enum": ["parent", "child", "depends_on", "blocks", "evidences", "supersedes", "derived_from"]
+        },
+        "boxId": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

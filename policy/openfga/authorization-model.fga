@@ -1,0 +1,45 @@
+model
+  schema 1.1
+
+type user
+
+type agent
+  relations
+    define owner: [user]
+    define operator: [user]
+    define can_act: owner or operator
+
+type organization
+  relations
+    define admin: [user]
+    define member: [user]
+    define agent: [agent]
+
+type fabric
+  relations
+    define owner: [user]
+    define admin: [user]
+    define operator: [user, agent]
+    define viewer: [user, agent]
+    define can_read: owner or admin or operator or viewer
+    define can_write: owner or admin or operator
+    define can_admin: owner or admin
+
+type box
+  relations
+    define owner: [user, agent]
+    define assignee: [user, agent]
+    define reviewer: [user]
+    define parent: [box]
+    define fabric: [fabric]
+    define can_read: owner or assignee or reviewer or can_read from fabric or can_read from parent
+    define can_write: owner or assignee or can_write from fabric
+    define can_review: reviewer or can_admin from fabric
+    define can_archive: owner or can_admin from fabric
+
+type evidence
+  relations
+    define owner: [user, agent]
+    define box: [box]
+    define can_read: owner or can_read from box
+    define can_write: owner or can_write from box

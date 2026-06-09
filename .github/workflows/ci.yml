@@ -1,0 +1,71 @@
+name: Fabric Agent CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate repository contracts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate JSON files
+        run: |
+          find . -name "*.json" -print0 | xargs -0 -I{} python -m json.tool {} > /dev/null
+
+      - name: Validate YAML files
+        run: |
+          python - <<'PY'
+          import pathlib, sys, yaml
+          for path in pathlib.Path('.').rglob('*.yml'):
+              yaml.safe_load(path.read_text())
+          for path in pathlib.Path('.').rglob('*.yaml'):
+              yaml.safe_load(path.read_text())
+          PY
+
+      - name: Check required files
+        run: |
+          test -f README.md
+          test -f docs/architecture.md
+          test -f contracts/fabric-agent.openapi.yaml
+          test -f contracts/box.schema.json
+          test -f contracts/fabric-event.schema.json
+          test -f policy/opa/deny-by-default.rego
+          test -f policy/opa/human-approval.rego
+          test -f policy/openfga/authorization-model.fga
+          test -f runtime/rust/Cargo.toml
+          test -f operator/crds/fabric.yaml
+          test -f operator/crds/agent.yaml
+          test -f operator/crds/box.yaml
+
+  rust:
+    name: Rust runtime checks
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: runtime/rust
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Format check
+        run: cargo fmt --check
+
+      - name: Build
+        run: cargo build --all-targets
+
+      - name: Test
+        run: cargo test --all

@@ -1,0 +1,68 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: agents.fabric.agnext.io
+spec:
+  group: fabric.agnext.io
+  scope: Namespaced
+  names:
+    plural: agents
+    singular: agent
+    kind: Agent
+    shortNames:
+      - ag
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              required:
+                - identity
+                - fabricRef
+                - mode
+              properties:
+                identity:
+                  type: string
+                fabricRef:
+                  type: string
+                mode:
+                  type: string
+                  enum:
+                    - observer
+                    - operator
+                    - reviewer
+                    - reconciler
+                scopes:
+                  type: array
+                  items:
+                    type: string
+                approvalRequired:
+                  type: boolean
+                  default: true
+                runtime:
+                  type: object
+                  properties:
+                    image:
+                      type: string
+                    version:
+                      type: string
+            status:
+              type: object
+              properties:
+                phase:
+                  type: string
+                lastObservedAt:
+                  type: string
+                  format: date-time
+                lastReconciledAt:
+                  type: string
+                  format: date-time
+                trustScore:
+                  type: number
+      subresources:
+        status: {}

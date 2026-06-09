@@ -1,0 +1,146 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/AGenNext/Fabric-Agent/contracts/fabric-event.schema.json",
+  "title": "Fabric Event",
+  "description": "Canonical auditable event emitted by a Fabric Agent during observe, decide, act, record, reconcile, and report loops.",
+  "type": "object",
+  "required": [
+    "eventId",
+    "boxId",
+    "eventType",
+    "actor",
+    "observedAt",
+    "sequence",
+    "payload"
+  ],
+  "properties": {
+    "eventId": {
+      "type": "string",
+      "description": "Globally unique event identifier. Recommended format: evt_<uuid>."
+    },
+    "boxId": {
+      "type": "string",
+      "description": "Box this event belongs to."
+    },
+    "eventType": {
+      "type": "string",
+      "enum": [
+        "intent.received",
+        "context.resolved",
+        "policy.checked",
+        "approval.requested",
+        "approval.granted",
+        "approval.denied",
+        "plan.created",
+        "action.started",
+        "action.completed",
+        "action.failed",
+        "evidence.attached",
+        "reconciliation.started",
+        "reconciliation.completed",
+        "state.changed",
+        "report.generated"
+      ]
+    },
+    "actor": {
+      "$ref": "#/$defs/identityRef"
+    },
+    "target": {
+      "$ref": "#/$defs/identityRef"
+    },
+    "sequence": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Monotonic sequence number inside the box event stream."
+    },
+    "payload": {
+      "type": "object",
+      "description": "Event-specific payload. Must be validated by the receiving fabric implementation."
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/evidenceRef"
+      },
+      "default": []
+    },
+    "policy": {
+      "$ref": "#/$defs/policyDecision"
+    },
+    "correlationId": {
+      "type": "string"
+    },
+    "causationId": {
+      "type": "string"
+    },
+    "observedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "schema": {
+      "type": "object",
+      "description": "Optional JSON-LD or schema.org semantic metadata snapshot."
+    }
+  },
+  "$defs": {
+    "identityRef": {
+      "type": "object",
+      "required": ["id", "type"],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["human", "agent", "service", "organization"]
+        },
+        "displayName": {
+          "type": "string"
+        }
+      }
+    },
+    "evidenceRef": {
+      "type": "object",
+      "required": ["evidenceId", "kind", "uri", "capturedAt"],
+      "properties": {
+        "evidenceId": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string",
+          "enum": ["log", "trace", "file", "approval", "api_response", "diff", "attestation"]
+        },
+        "uri": {
+          "type": "string"
+        },
+        "hash": {
+          "type": "string"
+        },
+        "capturedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "policyDecision": {
+      "type": "object",
+      "required": ["effect", "checkedAt"],
+      "properties": {
+        "effect": {
+          "type": "string",
+          "enum": ["allow", "deny", "requires_approval"]
+        },
+        "reason": {
+          "type": "string"
+        },
+        "checkedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "engine": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

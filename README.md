@@ -1,15 +1,16 @@
 # Fabric Agent
 
-Fabric Agent is the reference agent for the AGenNext Fabric model: a policy-first, identity-aware, event-driven agent that operates inside a governed fabric instead of acting as an unbounded script runner.
+Fabric Agent is the operating framework for governed agent work inside the AGenNext Fabric model. It is not only a single agent implementation. It is the foundation layer that connects Box, Identity, Policy, Evidence, Events, and Reconciliation into one accountable execution system.
 
 The core idea is simple:
 
 - **Fabric** is the governed work/data surface.
 - **Box** is the smallest accountable unit of work, state, event, evidence, and decision.
-- **Agent** is the operator that reads context, follows policy, executes tools, records evidence, and reconciles state.
+- **Fabric Agent** is the framework engine that operates boxes through policy, evidence, and reconciliation.
+- **Agent** is an operator instance running inside the Fabric Agent framework.
 - **Human gate** stays available for approval, override, escalation, and accountability.
 
-This repository defines the canonical structure for Fabric Agent implementations.
+This repository defines the canonical structure, contracts, policies, and runtime direction for Fabric Agent implementations.
 
 ## Why this exists
 
@@ -19,7 +20,22 @@ Most agent systems fail when the agent is allowed to act without a stable govern
 Intent -> Context -> Policy -> Plan -> Action -> Evidence -> Reconcile -> State
 ```
 
-The agent does not own the fabric. The agent operates inside the fabric.
+The agent does not own the fabric. The agent operates inside the Fabric Agent framework, and the framework operates inside the governed fabric.
+
+## Framework layers
+
+```text
+Fabric Agent
+├── Identity Layer
+├── Access Layer
+├── Policy Layer
+├── Context Layer
+├── Box Layer
+├── Event Layer
+├── Evidence Layer
+├── Reconciliation Layer
+└── Human Approval Layer
+```
 
 ## Principles
 
@@ -43,7 +59,13 @@ The agent does not own the fabric. The agent operates inside the fabric.
 │   └── implementation-notes.md
 ├── contracts/
 │   ├── fabric-agent.openapi.yaml
-│   └── fabric-agent.schema.json
+│   ├── box.schema.json
+│   └── fabric-event.schema.json
+├── policy/
+│   ├── opa/
+│   │   └── deny-by-default.rego
+│   └── openfga/
+│       └── authorization-model.fga
 ├── examples/
 │   └── box-event.json
 ├── .github/
@@ -58,7 +80,7 @@ The agent does not own the fabric. The agent operates inside the fabric.
 
 ## Minimal Fabric Agent contract
 
-A Fabric Agent must be able to:
+A Fabric Agent implementation must be able to:
 
 - receive an intent;
 - resolve context;
@@ -75,7 +97,7 @@ A Fabric Agent must be able to:
 observe -> decide -> act -> record -> reconcile -> report
 ```
 
-The agent is not just an instruction follower. It is an accountable operator in a governed work fabric.
+Fabric Agent is not just an instruction follower. It is the accountable operating framework for governed agent work.
 
 ## Status
 
